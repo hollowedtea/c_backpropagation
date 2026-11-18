@@ -1,15 +1,20 @@
 #include "matrix.h"
+#include "activation_functions.h"
+#include "cost_functions.h"
 #include <stddef.h>
+
+#ifndef _PERCEPTRON
+#define _PERCEPTRON
 
 typedef struct {
     size_t layers;
     matrix *matrices;
     matrix *biases;
-    float (**activation_functions)(float *, size_t, size_t);
-    float (*cost_function)(float *, float *);
+    activation_function *activation_functions;
+    cost_function cost_func;
 
 } perceptron;
 
-perceptron perceptron_init(size_t layer_count, size_t *layer_sizes, float (**activation_functions)(float *, size_t, size_t));
+perceptron perceptron_init(size_t layer_count, size_t *layer_sizes, activation_function *activation_functions, cost_function cost_func, float range[2]);
 matrix forward_propagation(perceptron *p, matrix input_layer);
-
+#endif

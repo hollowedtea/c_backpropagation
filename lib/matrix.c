@@ -17,7 +17,7 @@ void matrix_multiply(matrix m, matrix n, matrix *result) {
                 sum += (m.content)[i * m.columns + k] * (n.content)[k * n.columns + j];
             }
 
-            result->content[i * m.rows + j] = sum;
+            result->content[i * n.columns + j] = sum;
             sum = .0;
         }
     }

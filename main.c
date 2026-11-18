@@ -1,28 +1,28 @@
 #include "lib/matrix.h"
+#include "lib/cost_functions.h"
 #include "lib/perceptron.h"
-#include "lib/activation_functions.c"
+//#include "lib/activation_functions.c"
+#include "lib/activation_functions.h"
 #include <stdio.h>
 
 int main(void) {
     size_t layer_sizes[] = {2, 3, 2};
-    float (*funcs[2])(float *, size_t, size_t);
+    activation_function funcs[2];
 
-    funcs[0] = &ReLU;
-    funcs[1] = &softmax;
+    funcs[0] = construct_ReLU();
+    funcs[1] = construct_softmax();
 
-    perceptron p = perceptron_init(3, layer_sizes, funcs);
+    float range[] = {-10., 10.};
+
+    cost_function cost_func = construct_cross_entropy();
+
+    perceptron p = perceptron_init(3, layer_sizes, funcs, cost_func, range);
 
     matrix input = {};
-    matrix_init(&input, 1, 2);
+    matrix_init(&input, 2, 1);
 
     for (int i = 0; i < 2; i++) {
         input.content[i] = 1;
-    }
-
-    for (int i = 0; i < p.layers - 1; i++) {
-        for (int j = 0; j < p.matrices[i].rows * p.matrices[i].columns; j++) {
-            p.matrices[i].content[j] = (float)3/(i + j + 1);
-        }
     }
 
     matrix output = forward_propagation(&p, input);

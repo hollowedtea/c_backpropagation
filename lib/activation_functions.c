@@ -1,30 +1,77 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
-float ReLU(float *preprocess_layer, size_t layer_length, size_t current_neuron) {
-    if (preprocess_layer[current_neuron] < 0) {
+#include "activation_functions.h"
+
+static float ReLU(float *preprocess_layer, size_t layer_length, size_t current_node) {
+    if (preprocess_layer[current_node] < 0) {
         return .0;
     }
 
-    return preprocess_layer[current_neuron];
+    return preprocess_layer[current_node];
 }
 
-float ReLU_derivative(float *preprocess_layer, size_t layer_length, size_t current_neuron) {
-    if (preprocess_layer[current_neuron] <= 0) {
-        return .0;
+static matrix ReLU_jacobian(float *preprocess_layer, size_t layer_length) {
+    matrix jacobian = {};
+    matrix_init(&jacobian, layer_length, layer_length);
+
+    memset(jacobian.content, 0, sizeof(float) * layer_length * layer_length);
+
+    for (int i = 0; i < layer_length; i++) {
+        jacobian.content[i * layer_length + i] = (preprocess_layer[i] <= 0) ? .0 : 1.0;
     }
 
-    return 1.0;
+    return jacobian;
 }
 
-float softmax(float *preprocess_layer, size_t layer_length, size_t current_neuron) {
-    float result = exp(preprocess_layer[current_neuron]);
+static float softmax(float *preprocess_layer, size_t layer_length, size_t current_node) {
+    float result = expf(preprocess_layer[current_node]);
     float denominator = .0;
 
     for (int i = 0; i < layer_length; i++) {
-        denominator += exp(preprocess_layer[i]);
+        denominator += expf(preprocess_layer[i]);
     }
 
     return result/denominator;
+}
+
+static matrix softmax_jacobian(float *preprocess_layer, size_t layer_length) {
+    matrix jacobian = {};
+    matrix_init(&jacobian, layer_length, layer_length);
+
+    float *s = (float *)malloc(sizeof(float) * layer_length);
+    for (int i = 0; i < layer_length; i++) {
+        s[i] = softmax(preprocess_layer, layer_length, i);
+    }
+
+    for (int i = 0; i < layer_length; i++) {
+        for (int j = 0; j < layer_length; j++) {
+            if (i == j) {
+                jacobian.content[i * layer_length + j] = s[i] * (1 - s[i]);
+                continue;
+            }
+
+            jacobian.content[i * layer_length + j] = -s[i]*s[j];
+        }
+    }
+
+
+    free(s);
+    return jacobian;
+}
+
+activation_function construct_ReLU() {
+    return (activation_function){
+        .function = &ReLU,
+        .jacobian = &ReLU_jacobian
+    };
+};
+
+activation_function construct_softmax() {
+    return (activation_function){
+        .function = &softmax,
+        .jacobian = &softmax_jacobian,
+    };
 }
