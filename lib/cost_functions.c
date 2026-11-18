@@ -15,7 +15,7 @@ static float MSE(float *output_layer, float *target, size_t layer_length) {
 
 static matrix MSE_gradient(float *output_layer, float *target, size_t layer_length) {
     matrix gradient = {};
-    matrix_init(&gradient, 1, layer_length);
+    matrix_init(&gradient, layer_length, 1);
 
     for (int i = 0; i < layer_length; i++) {
         gradient.content[i] = 2 * (output_layer[i] - target[i]);
@@ -36,7 +36,7 @@ static float cross_entropy(float *output_layer, float *target, size_t layer_leng
 
 static matrix cross_entropy_gradient(float *output_layer, float *target, size_t layer_length) {
     matrix gradient = {};
-    matrix_init(&gradient, 1, layer_length);
+    matrix_init(&gradient, layer_length, 1);
 
     for (int i = 0; i < layer_length; i++) {
         gradient.content[i] = -target[i] / output_layer[i];

@@ -14,5 +14,7 @@ void matrix_init(matrix *m, size_t rows, size_t columns);
 void matrix_multiply(matrix m, matrix n, matrix *result);
 void matrix_add(matrix m, matrix n, matrix *result);
 void matrix_transpose(matrix *m);
+void matrix_scale(float c, matrix *m);
+void matrix_copy(matrix m, matrix *c);
 
 #endif

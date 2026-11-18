@@ -27,11 +27,20 @@ static matrix ReLU_jacobian(float *preprocess_layer, size_t layer_length) {
 }
 
 static float softmax(float *preprocess_layer, size_t layer_length, size_t current_node) {
-    float result = expf(preprocess_layer[current_node]);
+    // to avoid overflow
+    float max_node = preprocess_layer[0];
+    for (int i = 1; i < layer_length; i++) {
+        if (preprocess_layer[i] > max_node) {
+            max_node = preprocess_layer[i];
+        }
+    }
+
+    // just regular softmax
+    float result = expf(preprocess_layer[current_node] - max_node);
     float denominator = .0;
 
     for (int i = 0; i < layer_length; i++) {
-        denominator += expf(preprocess_layer[i]);
+        denominator += expf(preprocess_layer[i] - max_node);
     }
 
     return result/denominator;
